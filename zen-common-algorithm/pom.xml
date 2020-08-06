@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.zen.algorithm</groupId>
+    <artifactId>zen-common-algorithm</artifactId>
+    <packaging>jar</packaging>
+    <version>${project.major.version}</version>
+
+    <properties>
+        <spark.version>2.3.4</spark.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hadoop.version>2.6.0</hadoop.version>
+        <project.major.version>1.0</project.major.version>
+    </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <name>User Porject Snapshot</name>
+            <url>http://192.168.6.138:9009/repository/maven-public/</url>
+            <uniqueVersion>true</uniqueVersion>
+        </snapshotRepository>
+        <repository>
+            <id>nexus-releases</id>
+            <name>User Porject Release</name>
+            <url>http://192.168.1.85:9009/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
+    <dependencies>
+        <dependency>
+            <groupId>com.zen.mleap</groupId>
+            <artifactId>zen-common-mleap</artifactId>
+            <version>1.1</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>protobuf-java</artifactId>
+                    <groupId>com.google.protobuf</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>2.7.7</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>protobuf-java</artifactId>
+                    <groupId>com.google.protobuf</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-mapreduce-client-core -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-mapreduce-client-core</artifactId>
+            <version>2.7.7</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>protobuf-java</artifactId>
+                    <groupId>com.google.protobuf</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.0-jre</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zen.tensorflow</groupId>
+            <artifactId>zen-common-tensorflow</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zen.bandit</groupId>
+            <artifactId>zen-common-bandit</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!--scala待编译的文件目录-->
+        <sourceDirectory>src/main/scala</sourceDirectory>
+        <!--<testSourceDirectory>src/test/scala</testSourceDirectory>-->
+        <!--scala插件-->
+        <plugins>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>3.2.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <!--<arg>-make:transitive</arg>--><!--scala2.11 netbean不支持这个参数-->
+                                <arg>-dependencyfile</arg>
+                                <arg>${project.build.directory}/.scala_dependencies</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--单元测试插件（跳过 surefire，使用 scalatest）-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
+
+            <!--manven打包插件-->
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.spark.ml.util.DefaultParamsReader</pattern>
+                                    <shadedPattern>org.apache.spark.ml.util.DPR</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

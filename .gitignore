@@ -1,0 +1,11 @@
+# Project exclude paths
+/zen-common-algorithm/target/
+/zen-common-bandit/target/
+/zen-common-mleap/target/
+/zen-common-spark/target/
+/zen-common-tensorflow/target/
+/zen-model-manage/target/
+.idea
+logs
+*.class
+*.log

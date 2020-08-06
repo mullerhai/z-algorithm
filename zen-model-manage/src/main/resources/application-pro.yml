@@ -1,0 +1,27 @@
+server:
+  port: 443
+
+spring:
+  datasource:
+    username: zenad
+    password: 1qiRqq4W8#pC
+    url: jdbc:mysql://10.0.1.16:3306/zengame_model?useUnicode=true&characterEncoding=utf8
+    driver-class-name: com.mysql.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapping/*Mapper.xml
+  type-aliases-package: com.example.entity
+
+#showSql
+logging:
+  level:
+    com:
+      example:
+        mapper : debug
+
+# 配置pagehelper参数
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql

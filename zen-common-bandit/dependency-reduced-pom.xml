@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.zen.bandit</groupId>
+  <artifactId>zen-common-bandit</artifactId>
+  <version>1.0</version>
+  <build>
+    <finalName>zen-common-bandit</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+          <encoding>UTF-8</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>shade-hessian</id>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createSourcesJar>true</createSourcesJar>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <distributionManagement>
+    <repository>
+      <id>nexus-releases</id>
+      <name>User Porject Release</name>
+      <url>http://192.168.6.138:9009/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <name>User Porject Snapshot</name>
+      <url>http://192.168.6.138:9009/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+</project>

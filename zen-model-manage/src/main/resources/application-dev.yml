@@ -1,0 +1,27 @@
+server:
+  port: 8089
+
+spring:
+  datasource:
+    username: root
+    password:
+    url: jdbc:mysql://192.168.1.137:3306/zengame-model?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+    driver-class-name: com.mysql.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapping/*Mapper.xml
+  type-aliases-package: com.example.entity
+
+#showSql
+logging:
+  level:
+    com.zen.model.manage.mapper: debug
+#  config: classpath:log.yml
+
+
+# 配置pagehelper参数
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
