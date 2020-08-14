@@ -246,7 +246,10 @@ class CusVectorAssemblerModel @Since("1.4.0")(
   }
 
   @Since("1.4.1")
-  override def copy(extra: ParamMap): CusVectorAssemblerModel = defaultCopy(extra)
+  override def copy(extra: ParamMap): CusVectorAssemblerModel = {
+    val copied = new CusVectorAssemblerModel(uid, inputVectorDims, outputVectorDim)
+    copyValues(copied, extra).setParent(parent)
+  }
 
   override def write: _root_.org.apache.spark.ml.util.MLWriter = new CusVectorAssemblerModelWriter(this)
 }

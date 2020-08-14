@@ -13,7 +13,7 @@
         <spark.version>2.3.4</spark.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hadoop.version>2.6.0</hadoop.version>
-        <project.major.version>1.1</project.major.version>
+        <project.major.version>1.2</project.major.version>
     </properties>
 
     <dependencies>

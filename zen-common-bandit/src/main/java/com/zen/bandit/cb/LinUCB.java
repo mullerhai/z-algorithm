@@ -296,7 +296,7 @@ public class LinUCB implements Serializable {
             RealMatrix cur_A_a_inverse = A_a_inverse.get(indexs.get(0));
             RealMatrix cur_theta_hat_a = theta_hat_a.get(indexs.get(0));
             for (int i = 1; i < indexs.size(); i++) {
-                cur_A_a = cur_b_a.add(A_a.get(indexs.get(i)));
+                cur_A_a = cur_A_a.add(A_a.get(indexs.get(i)));
                 cur_b_a = cur_b_a.add(b_a.get(indexs.get(i)));
                 cur_A_a_inverse = cur_A_a_inverse.add(A_a_inverse.get(indexs.get(i)));
                 cur_theta_hat_a = cur_theta_hat_a.add(theta_hat_a.get(indexs.get(i)));

@@ -18,22 +18,21 @@
 package org.apache.spark.ml.feature
 
 import org.apache.hadoop.fs.Path
-
 import org.apache.spark.SparkException
 import org.apache.spark.annotation.Since
-import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.ml.attribute._
 import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.param.shared.{HasHandleInvalid, HasInputCols, HasOutputCols}
 import org.apache.spark.ml.util._
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.ml.{Estimator, Model}
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, lit, udf}
 import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, Dataset}
 
 /** Private trait for params and common methods for CusOneHotEncoderEstimator and CusOneHotEncoderModel */
-private[ml] trait OneHotEncoderBase extends Params with HasHandleInvalid
+private[ml] trait CusOneHotEncoderBase extends Params with HasHandleInvalid
   with HasInputCols with HasOutputCols {
 
   /**
@@ -43,6 +42,7 @@ private[ml] trait OneHotEncoderBase extends Params with HasHandleInvalid
    * Note that this Param is only used during transform; during fitting, invalid data
    * will result in an error.
    * Default: "error"
+   *
    * @group param
    */
   @Since("2.3.0")
@@ -57,6 +57,7 @@ private[ml] trait OneHotEncoderBase extends Params with HasHandleInvalid
 
   /**
    * Whether to drop the last category in the encoded vector (default: true)
+   *
    * @group param
    */
   @Since("2.3.0")
@@ -86,7 +87,7 @@ private[ml] trait OneHotEncoderBase extends Params with HasHandleInvalid
     val inputFields = $(inputCols).map(schema(_))
 
     val outputFields = inputFields.zip(outputColNames).map { case (inputField, outputColName) =>
-      OneHotEncoderCommon.transformOutputColumnSchema(
+      CusOneHotEncoderCommon.transformOutputColumnSchema(
         inputField, outputColName, dropLast, keepInvalid)
     }
     outputFields.foldLeft(schema) { case (newSchema, outputField) =>
@@ -105,20 +106,18 @@ private[ml] trait OneHotEncoderBase extends Params with HasHandleInvalid
  * So an input value of 4.0 maps to `[0.0, 0.0, 0.0, 0.0]`.
  *
  * @note This is different from scikit-learn's OneHotEncoder, which keeps all categories.
- * The output vectors are sparse.
+ *       The output vectors are sparse.
  *
- * When `handleInvalid` is configured to 'keep', an extra "category" indicating invalid values is
- * added as last category. So when `dropLast` is true, invalid values are encoded as all-zeros
- * vector.
- *
+ *       When `handleInvalid` is configured to 'keep', an extra "category" indicating invalid values is
+ *       added as last category. So when `dropLast` is true, invalid values are encoded as all-zeros
+ *       vector.
  * @note When encoding multi-column by using `inputCols` and `outputCols` params, input/output cols
- * come in pairs, specified by the order in the arrays, and each pair is treated independently.
- *
+ *       come in pairs, specified by the order in the arrays, and each pair is treated independently.
  * @see `StringIndexer` for converting categorical values into category indices
  */
 @Since("2.3.0")
-class CusOneHotEncoderEstimator @Since("2.3.0") (@Since("2.3.0") override val uid: String)
-  extends Estimator[CusOneHotEncoderModel] with OneHotEncoderBase with DefaultParamsWritable {
+class CusOneHotEncoderEstimator @Since("2.3.0")(@Since("2.3.0") override val uid: String)
+  extends Estimator[CusOneHotEncoderModel] with CusOneHotEncoderBase with DefaultParamsWritable {
 
   @Since("2.3.0")
   def this() = this(Identifiable.randomUID("oneHotEncoder"))
@@ -175,7 +174,7 @@ class CusOneHotEncoderEstimator @Since("2.3.0") (@Since("2.3.0") override val ui
 
       // When fitting data, we want the plain number of categories without `handleInvalid` and
       // `dropLast` taken into account.
-      val attrGroups = OneHotEncoderCommon.getOutputAttrGroupFromData(
+      val attrGroups = CusOneHotEncoderCommon.getOutputAttrGroupFromData(
         dataset, inputColNames, outputColNames, dropLast = false)
       attrGroups.zip(columnToScanIndices).foreach { case (attrGroup, idx) =>
         categorySizes(idx) = attrGroup.size
@@ -209,7 +208,7 @@ object CusOneHotEncoderEstimator extends DefaultParamsReadable[CusOneHotEncoderE
 class CusOneHotEncoderModel(
                              @Since("2.3.0") override val uid: String,
                              @Since("2.3.0") var categorySizes: Array[Int])
-  extends Model[CusOneHotEncoderModel] with OneHotEncoderBase with MLWritable {
+  extends Model[CusOneHotEncoderModel] with CusOneHotEncoderBase with MLWritable {
 
   import CusOneHotEncoderModel._
 
@@ -221,8 +220,8 @@ class CusOneHotEncoderModel(
   // Returns the category size for each index with `dropLast` and `handleInvalid`
   // taken into account.
   private def getConfigedCategorySizes: Array[Int] = {
-//    val dropLast = getDropLast
-//    val keepInvalid = getHandleInvalid == CusOneHotEncoderEstimator.KEEP_INVALID
+    //    val dropLast = getDropLast
+    //    val keepInvalid = getHandleInvalid == CusOneHotEncoderEstimator.KEEP_INVALID
 
     /*if (!dropLast && keepInvalid) {
       // When `handleInvalid` is "keep", an extra category is added as last category
@@ -321,7 +320,7 @@ class CusOneHotEncoderModel(
       // `dropLast` taken into account.
       if (attrGroup.attributes.nonEmpty) {
         val numCategories = configedSizes(idx)
-        require(attrGroup.size - 1 == numCategories, "CusOneHotEncoderModel expected " +
+        require(attrGroup.size == numCategories, "CusOneHotEncoderModel expected " +
           s"$numCategories categorical values for input column $inputColName, " +
           s"but the input column had metadata specifying ${attrGroup.size} values.")
       }
@@ -342,7 +341,7 @@ class CusOneHotEncoderModel(
         AttributeGroup.fromStructField(transformedSchema(outputColName))
 
       val metadata = if (outputAttrGroupFromSchema.size < 0) {
-        OneHotEncoderCommon.createAttrGroupForAttrNames(outputColName,
+        CusOneHotEncoderCommon.createAttrGroupForAttrNames(outputColName,
           categorySizes(idx), $(dropLast), keepInvalid).toMetadata()
       } else {
         outputAttrGroupFromSchema.toMetadata()
@@ -407,7 +406,7 @@ object CusOneHotEncoderModel extends MLReadable[CusOneHotEncoderModel] {
 /**
  * Provides some helper methods used by both `OneHotEncoder` and `CusOneHotEncoderEstimator`.
  */
-private[feature] object OneHotEncoderCommon {
+private[feature] object CusOneHotEncoderCommon {
 
   private def genOutputAttrNames(inputCol: StructField): Option[Array[String]] = {
     val inputAttr = Attribute.fromStructField(inputCol)
@@ -443,7 +442,7 @@ private[feature] object OneHotEncoderCommon {
         BinaryAttribute.defaultAttr.withName(name)
       }
       new AttributeGroup(outputColName, attrs)
-    }.getOrElse{
+    }.getOrElse {
       new AttributeGroup(outputColName)
     }
   }
@@ -463,7 +462,7 @@ private[feature] object OneHotEncoderCommon {
           s"The input column ${inputCol.name} should have at least two distinct values.")
         names.dropRight(1)
       } else if (!dropLast && keepInvalid) {
-        names ++ Seq("invalidValues")
+        names /*++ Seq("invalidValues")*/
       } else {
         names
       }
@@ -525,7 +524,7 @@ private[feature] object OneHotEncoderCommon {
     val filtered = if (dropLast && !keepInvalid) {
       outputAttrNames.dropRight(1)
     } else if (!dropLast && keepInvalid) {
-      outputAttrNames ++ Seq("invalidValues")
+      outputAttrNames /*++ Seq("invalidValues")*/
     } else {
       outputAttrNames
     }
